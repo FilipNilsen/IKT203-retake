@@ -1,12 +1,16 @@
-# 1. Define the executable name
-# This is what the students will run (e.g., Task-3.exe)
-add_executable(Task-4 main.cpp)
+cmake_minimum_required(VERSION 3.28.6)
+project(exercise3)
 
-# 2. Link the Common Library
-# This command connects the executable to your StructureReader code.
-# Because we used 'PUBLIC' in the reader's setup, Task-4 
-# automatically knows where to find "StructureReaderLib.h".
-target_link_libraries(Task-4 PRIVATE StructureReader)
+set(CMAKE_CXX_STANDARD 23)
 
-# 3. Handle the Data Files (The "Structure" folder) use excaped quotes to be Linux friendly
-target_compile_definitions(Task-4 PRIVATE STRUCTURE_DIR=\"${STRUCTURE_PATH}\")
+add_executable(exercise3 main.cpp
+        include/constants.h
+        include/TQueue.h
+        include/TStack.h
+        include/TCoordinate.h
+        include/TGrid.h
+        include/TSearchAlgorithm.h
+        include/IStorage.h)
+
+add_custom_target(plantuml)
+add_custom_command(PRE_BUILD TARGET plantuml COMMAND plantuml ARGS -tsvg ../main.cpp)

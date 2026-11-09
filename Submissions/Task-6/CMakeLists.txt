@@ -1,12 +1,23 @@
-# 1. Define the executable name
-# This is what the students will run (e.g., Task-5.exe)
-add_executable(Task-6 main.cpp)
+﻿# CMakeList.txt : CMake project for Submission-01, include source and define
+# project specific logic here.
+#
 
-# 2. Link the Common Library
-# This command connects the executable to your StructureReader code.
-# Because we used 'PUBLIC' in the reader's setup, Task-6 
-# automatically knows where to find "StructureReaderLib.h".
-target_link_libraries(Task-6 PRIVATE StructureReader)
+# Add source to this project's executable.
+add_executable (Submission-05 "main.cpp" "main.h")
+target_link_libraries(Submission-05 PRIVATE  Submission04Lib)
 
-# 3. Handle the Data Files (The "Structure" folder) use excaped quotes to be Linux friendly
-target_compile_definitions(Task-6 PRIVATE STRUCTURE_DIR=\"${STRUCTURE_PATH}\")
+# Add source files to a Submission04Lib library
+add_library(Submission04Lib
+    BankAccount.cpp
+    BankAccount.h
+    ReadNames.cpp
+    ReadNames.h
+    BankAccountList.cpp
+    BankAccountList.h
+)
+
+if (CMAKE_VERSION VERSION_GREATER 3.20)
+  set_property(TARGET Submission-05 PROPERTY CXX_STANDARD 20)
+endif()
+
+# TODO: Add tests and install targets if needed.

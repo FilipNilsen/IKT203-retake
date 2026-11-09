@@ -1,0 +1,22 @@
+@startuml
+class TStack{
+    + Push():Boolean
+    + Pop()
+}
+
+class TQueue{
+    + Enqueue():Boolean
+    + Dequeue()
+}
+
+class IStorage <<interface>>{
+    + Add():Boolean
+    + Take()
+    + Peek() {query}
+    + IsEmpty():Boolean {query}
+    + Dump() {query}
+}
+
+TStack--|>IStorage
+TQueue--|>IStorage
+@enduml
