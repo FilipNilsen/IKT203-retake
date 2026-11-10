@@ -113,7 +113,7 @@ private:
 		do {
 			std::string* b = a->GetContent();
 			if (b != nullptr) {
-				printDocumentCopy->Append(b);
+				printDocumentCopy->Append(new std::string(*b));
 			}
 			a = a->GetNextElement();
 		} while (a != nullptr);
