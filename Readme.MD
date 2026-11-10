@@ -1,5 +1,6 @@
 # 🌌 IKT203: Algorithms and Data Structures
 
+I have to retake this subject. But the good news is that I have permission to reuse code from last year.
 
 ### **DON'T PANIC!**  
 Welcome to the official starter repository for IKT203! 🚀 
