@@ -1,6 +1,8 @@
 # "ON" = build Option 1, "OFF" = build Option 2.
 option(BUILD_CATEGORY_1_OPTION_1 "Build Assignment-Category 1 Option 1 (Standard)" ON)
 
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=address")
+
 add_executable(Category-1
     
     
