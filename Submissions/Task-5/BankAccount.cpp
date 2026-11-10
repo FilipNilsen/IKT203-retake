@@ -13,6 +13,17 @@
 #include <stdexcept> // For std::invalid_argument
 #include <string>
 
+#ifdef __linux__
+#ifndef _mkgmtime
+#define _mkgmtime timegm
+// Linux-erstatning for Windows sin ctime_s
+inline int ctime_s(char* buf, size_t bufsz, const time_t* timer) {
+	if (!buf || bufsz < 26 || !timer) return 22; // EINVAL
+	if (ctime_r(timer, buf) == NULL) return 22;
+	return 0;
+}
+#endif
+#endif
 
 TBankAccount::TBankAccount(EBankAccountType accType, std::string firstName, std::string lastName)
 	: accountType(accType), ownerFirstName(firstName), ownerLastName(lastName)
