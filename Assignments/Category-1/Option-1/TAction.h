@@ -21,7 +21,7 @@ public:
 	/**
 	* Constructor
 	* @param type Etype::add or Etype::remove
-	* @param str RefCounted* that has a std::string as its content. str will have its reference count incremented if it's not a nullptr.
+	* @param str std::string that is copied for this object.
 	* @param lineno Linenumber or -1 to operate on the last line
 	*/
 	TAction(Etype type, std::string* str, int32_t lineno) {
@@ -31,7 +31,6 @@ public:
 		this->lineno = lineno;
 	}
 
-	//! Destructor, does decrease reference count for str
 	~TAction() {
 		if (ownsData) {
 			if (str != nullptr)
@@ -66,12 +65,12 @@ public:
 		else if (type == Etype::remove) {
 			if (lineno <= -1) {
 				if (str == nullptr){
-					str = document->GetTail()->GetPreviousElement()->GetContent();
+					str = new std::string(*document->GetTail()->GetPreviousElement()->GetContent());
 				}
 				document->RemoveLast();
 			}
 			else if (str == nullptr) {
-				str = document->GetAndRemoveAtIndex(lineno);
+				str = new std::string(*document->GetAndRemoveAtIndex(lineno));
 			}
 			else {
 				document->Remove(lineno);
