@@ -12,12 +12,12 @@ enum class Etype {
 class TAction {
 	Etype type;
 	//! RefCounted* that has a std::string as its content.
-	std::string* str;
+	std::string* str = nullptr;
 	//! Line number, starts at 0
 	int32_t lineno;
 
 public:
-	bool ownsData = false;
+	bool ownsData = true;
 	/**
 	* Constructor
 	* @param type Etype::add or Etype::remove
@@ -26,14 +26,16 @@ public:
 	*/
 	TAction(Etype type, std::string* str, int32_t lineno) {
 		this->type = type;
-		this->str = str;
+		if (str != nullptr)
+			this->str = new std::string(*str);
 		this->lineno = lineno;
 	}
 
 	//! Destructor, does decrease reference count for str
 	~TAction() {
 		if (ownsData) {
-			delete str;
+			if (str != nullptr)
+				delete str;
 		}
 	}
 
@@ -55,10 +57,10 @@ public:
 	auto PreformOnDocument(TDLinkedList<std::string*>* document) {
 		if (type == Etype::add) {
 			if (lineno <= -1) {
-				document->Append(this->str);
+				document->Append(new std::string(*this->str));
 			}
 			else {
-				document->InsertBefore(lineno, str);
+				document->InsertBefore(lineno, new std::string(*str));
 			}
 		}
 		else if (type == Etype::remove) {
