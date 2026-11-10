@@ -30,11 +30,11 @@ The last case is problematic because you can't then do any modifications to the 
 @todo Undeprecate ownsData. I'm planning to write a RefCounted wrapper class whoose destructor calls RefCounted::Dec() anyway.
 @author Filip
 */
+template <typename T>
 class TDLinkedList {
 private:
-    TDLinkedListNode* head;
-    TDLinkedListNode* tail;
-    /** @deprecated Use reference counting objects. */
+    TDLinkedListNode<T>* head;
+    TDLinkedListNode<T>* tail;
     bool ownsData = true;
 
 public:
@@ -42,14 +42,14 @@ public:
     auto GetTail() { return this->tail; }
 
     TDLinkedList(bool ownsData = true) {
-        head = new TDLinkedListNode(nullptr);
-        tail = new TDLinkedListNode(nullptr, nullptr, this->head);
+        head = new TDLinkedListNode<T>(nullptr);
+        tail = new TDLinkedListNode<T>(nullptr, nullptr, this->head);
         head->SetNextElementTo(this->tail);
         this->ownsData = ownsData;
     }
 
     ~TDLinkedList() {
-        TDLinkedListNode* pNext = nullptr;
+        TDLinkedListNode<T>* pNext = nullptr;
         do {
             pNext = head->GetNextElement();
             delete head;
@@ -58,7 +58,7 @@ public:
         } while (head != nullptr);
     }
 
-    void Append(RefCounted<>* aMovie) {
+    void Append(T aMovie) {
         /*
          ┌────────┐                                          ┌────────┐
          │-1:     │                           3              │tail:   │
@@ -78,13 +78,13 @@ public:
         4. Set newElement.previous.next to newElement
         */
 
-        auto newElement = new TDLinkedListNode(aMovie, tail);
+        auto newElement = new TDLinkedListNode<T>(aMovie, tail);
         newElement->SetPreviousElementTo(tail->GetPreviousElement());
         tail->SetPreviousElementTo(newElement);
         newElement->GetPreviousElement()->SetNextElementTo(newElement);
     }
 
-    void Prepend(RefCounted<>* aTMovie) {
+    void Prepend(T aTMovie) {
         /*
         ┌╶╶╶╶╶╶╶╶┐                                                  ┌╶╶╶╶╶╶╶╶┐
         ╎head:   ╎                    2                             ╎0:      ╎
@@ -103,23 +103,23 @@ public:
         3. newElement.next.previous=newElement
          */
 
-        auto newElement = new TDLinkedListNode(aTMovie, head->GetNextElement(), head, ownsData);
+        auto newElement = new TDLinkedListNode<T>(aTMovie, head->GetNextElement(), head, ownsData);
         head->SetNextElementTo(newElement);
         newElement->GetNextElement()->SetPreviousElementTo(newElement);
     }
 
-    void InsertAfter(size_t anIndex, RefCounted<>* aNewElement) {
+    void InsertAfter(size_t anIndex, T aNewElement) {
         //Started as copy of function above
         auto after = GetNodeAtIndex(anIndex);
-        auto newElement = new TDLinkedListNode(aNewElement, after->GetNextElement(), after, ownsData);
+        auto newElement = new TDLinkedListNode<T>(aNewElement, after->GetNextElement(), after, ownsData);
         newElement->GetPreviousElement()->SetNextElementTo(newElement);  
         after->SetPreviousElementTo(newElement);
     }
 
-    void InsertBefore(size_t anIndex, RefCounted<>* aNewElement) {
+    void InsertBefore(size_t anIndex, T aNewElement) {
         //Started as copy of function above
         auto before = GetNodeAtIndex(anIndex);
-        auto newElement = new TDLinkedListNode(aNewElement, before, before->GetPreviousElement(), ownsData);
+        auto newElement = new TDLinkedListNode<T>(aNewElement, before, before->GetPreviousElement(), ownsData);
         before->SetPreviousElementTo(newElement);
         newElement->GetPreviousElement()->SetNextElementTo(newElement);
     }
@@ -136,9 +136,9 @@ public:
     }
 
     /**
-     * @returns The TDLinkedListNode* at `aIndex`
+     * @returns The TDLinkedListNode<T>* at `aIndex`
      */
-    TDLinkedListNode* GetNodeAtIndex(size_t aIndex) {
+    TDLinkedListNode<T>* GetNodeAtIndex(size_t aIndex) {
         auto currentIndex = this->head->GetNextElement();
         for (size_t i = 0; i < aIndex; ++i) {
             if (currentIndex->GetContent() == nullptr)
@@ -163,7 +163,7 @@ public:
      * 
      * @returns The RefCounted* at `aIndex`
      */
-    RefCounted<>* GetAndRemoveAtIndex(size_t aIndex){
+    T GetAndRemoveAtIndex(size_t aIndex){
         auto toDelete = GetNodeAtIndex(aIndex);
         toDelete->GetPreviousElement()->SetNextElementTo(toDelete->GetNextElement());
         toDelete->GetNextElement()->SetPreviousElementTo(toDelete->GetPreviousElement());

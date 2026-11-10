@@ -13,11 +13,8 @@
 *         Please ask for help in Discord if you have any questions or need assistance with the implementation.
 */
 
-#pragma once
-#include "IStorage.h"
-
-template <typename T>
-class TStack: public IStorage<T> {
+template <typename T, int MAX_SIZE=100>
+class TStack {
 private:
     T storedData[MAX_SIZE];
     T* top = storedData-1;  //Top points to the top element in the stack.
@@ -37,7 +34,7 @@ public:
         *top = item;
         return true;
     }
-    bool Add(T item) override {
+    bool Add(T item) {
         return Push(item);
     }
 
@@ -50,15 +47,15 @@ public:
         --top;
         return return_value;
     }
-    T Take() override {
+    T Take() {
         return Pop();
     }
 
-    T Peek() const override {
+    T Peek() const {
         return *top;
     }
 
-    bool IsEmpty() const override {
+    bool IsEmpty() const {
         if (top < storedData) {
             return true;
         }
@@ -69,7 +66,7 @@ public:
             return true;
     }
 
-    void Dump() const override {
+    void Dump() const {
         const T* i = storedData;
         while (i <= top) {
             //printf("%i ", *i);

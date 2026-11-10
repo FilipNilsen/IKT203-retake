@@ -10,32 +10,31 @@
 @brief Node for elements stored in the double linked list.
 @see TDLinkedList
 */
+template <typename T>
 class TDLinkedListNode {
 private:
-    RefCounted<>* content;
+    T content;
     TDLinkedListNode* pointerToNextNode;
     TDLinkedListNode* pointerToPrevNode;
     bool ownsData = true;
 
 public:
-    TDLinkedListNode(RefCounted<>* pointerToContent, TDLinkedListNode* pointerToNextNode = nullptr, TDLinkedListNode* pointerToPreviousNode = nullptr, bool ownsData = true) {
+    TDLinkedListNode(T pointerToContent, TDLinkedListNode* pointerToNextNode = nullptr, TDLinkedListNode* pointerToPreviousNode = nullptr, bool ownsData = true) {
         this->content = std::move(pointerToContent);
-        if (this->content != nullptr) {
-            this->content->Inc();
-        }
         this->pointerToNextNode = pointerToNextNode;
         this->pointerToPrevNode = pointerToPreviousNode;
         this->ownsData = ownsData;
     }
 
     ~TDLinkedListNode() {
-        if (this->content != nullptr)
-            content->Dec();
+        if (ownsData) {
+            delete content;
+        }
     }
 
     TDLinkedListNode* GetNextElement() { return this->pointerToNextNode; }
     void SetNextElementTo(TDLinkedListNode* aTMovie) { this->pointerToNextNode = aTMovie; }
-    RefCounted<>* GetContent() { return this->content; }
+    T GetContent() { return this->content; }
     void SetPreviousElementTo(TDLinkedListNode* aTMovie) { this->pointerToPrevNode = aTMovie; }
     TDLinkedListNode* GetPreviousElement() { return this->pointerToPrevNode; }
 };

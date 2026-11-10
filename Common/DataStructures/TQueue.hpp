@@ -12,16 +12,12 @@
 *         Please ask for help in Discord if you have any questions or need assistance with the implementation.
 */
 
-#pragma once
-#include "constants.h"
-#include "IStorage.h"
-
 /**
  * A queue
  * @param T Data type to store. Must be a pointer.
  */
-template <typename T>
-class TQueue: public IStorage<T> {
+template <typename T, int MAX_SIZE=100>
+class TQueue {
 private:
     T storedData[MAX_SIZE] = {0};
     T* front = storedData;
@@ -48,7 +44,7 @@ public:
         ++numberOfElements;
         return true;
     }
-    bool Add(T item) override{
+    bool Add(T item) {
         return Enqueue(item);
     }
 
@@ -70,11 +66,11 @@ public:
         return Dequeue();
     }
 
-    T Peek() const override {
+    T Peek() const {
         return *front;
     }
 
-    bool IsEmpty() const override {
+    bool IsEmpty() const {
         if (numberOfElements<=0) {
             return true;
         }
@@ -87,7 +83,7 @@ public:
     /**
     Print out all elements in queue to the terminal.
     Uses `<<` so overloading `<<` for the object you're storing can make this more readable. */
-    void Dump() const override{
+    void Dump() const {
         const T* i = storedData;
         while (i <= &storedData[MAX_SIZE-1]) {
             //printf("%i ", *i);
