@@ -16,9 +16,10 @@ private:
     T content;
     TDLinkedListNode* pointerToNextNode;
     TDLinkedListNode* pointerToPrevNode;
-    bool ownsData = true;
 
 public:
+    bool ownsData = true;
+    
     TDLinkedListNode(T pointerToContent, TDLinkedListNode* pointerToNextNode = nullptr, TDLinkedListNode* pointerToPreviousNode = nullptr, bool ownsData = true) {
         this->content = std::move(pointerToContent);
         this->pointerToNextNode = pointerToNextNode;

@@ -159,15 +159,16 @@ public:
         return true;
     }
 
-    /** @brief  Removes RefCounted* at `aIndex` from this TDlinkedList and returns it.
-     * 
-     * @returns The RefCounted* at `aIndex`
+    /** @brief  Removes T at `aIndex` from this TDlinkedList and returns it. Ownership of the data at aIndex is removed from the list.
+     * @param[in] aIndex
+     * @returns The T at `aIndex`. You take ownership of this, otherwise it will be dangling.
      */
     T GetAndRemoveAtIndex(size_t aIndex){
         auto toDelete = GetNodeAtIndex(aIndex);
         toDelete->GetPreviousElement()->SetNextElementTo(toDelete->GetNextElement());
         toDelete->GetNextElement()->SetPreviousElementTo(toDelete->GetPreviousElement());
         auto content = toDelete->GetContent();
+        toDelete->ownsData = false;
         delete toDelete;
         return content;
     }
