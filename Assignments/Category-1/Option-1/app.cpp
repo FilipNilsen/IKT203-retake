@@ -5,11 +5,10 @@
 #include <string>
 #include <iostream>
 #include <sstream>
-#include <NewStuff/RefCounted.h>
-#include "PrevAssignments/TDLinkedList.h"
-#include "PrevAssignments/TStack.h"
+#include "DataStructures/TLinkedList.hpp"
+#include "DataStructures/TStack.hpp"
 #include "VT100.h"
-#include <PrevAssignments/TQueue.h>
+#include <DataStructures/TQueue.hpp>
 #include <fstream> 
 #include "TAction.h"
 
@@ -22,24 +21,24 @@
 
 class TextEditor {
 private:
-	TDLinkedList document = TDLinkedList(false);
+	TDLinkedList<std::string*> document = TDLinkedList<std::string*>(true);
 	TStack<TAction*>* undoStack = new TStack<TAction*>();
 	TStack<TAction*>* redoStack = new TStack<TAction*>();
-	TQueue<TDLinkedList*>* printQueue = new TQueue<TDLinkedList*>;
+	TQueue<TDLinkedList<std::string*>*>* printQueue = new TQueue<TDLinkedList<std::string*>*>;
 
 	auto resetRedoStack(){
 		delete redoStack;
 		redoStack = new TStack<TAction*>;
 	}
 
-	auto addTextToDocument(RefCounted<>* textToAdd, uint16_t lineNo) {
+	auto addTextToDocument(std::string* textToAdd, uint16_t lineNo) {
 		undoStack->Push(new TAction(Etype::add, textToAdd, lineNo));
 		resetRedoStack();
 		document.InsertBefore(lineNo, textToAdd);
 		//std::cout << "add " << *(std::string*)textToAdd->Content() << " to line " << lineNo << std::endl;
 	};
 
-	auto addTextToDocument(RefCounted<>* textToAdd) {
+	auto addTextToDocument(std::string* textToAdd) {
 		//std::cout << "add " << textToAdd << " to end\n";
 		undoStack->Push(new TAction(Etype::add, textToAdd, -1));
 		resetRedoStack();
@@ -47,12 +46,12 @@ private:
 	};
 
 	auto showDocument() {
-		TDLinkedListNode* a = document.GetHead();
+		TDLinkedListNode<std::string*>* a = document.GetHead();
 		uint16_t d = 0;
 		do {
-			RefCounted<>* b = a->GetContent();
+			std::string* b = a->GetContent();
 			if (b != nullptr) {
-				auto c = (std::string*)b->Content();
+				auto c = (std::string*)b;
 				std::cout << ++d << " " << vt100::CHA(3) << " " << *c << std::endl;
 			}
 			a = a->GetNextElement();
@@ -95,10 +94,10 @@ private:
 		using namespace std;
 		ifstream f(filename);
 		string* s = new string();
-		RefCounted<void*>* r;
+		string* r;
 		TAction* a;
 		while (getline(f, *s)) {
-			r = new RefCounted<void*>(s);
+			r = new string(*s);
 			a = new TAction(Etype::add, r, -1);
 			a->PreformOnDocument(&document);
 			undoStack->Push(a);
@@ -109,10 +108,10 @@ private:
 	};
 
 	auto SpoolPrint() {
-		TDLinkedListNode* a = document.GetHead();
-		auto printDocumentCopy = new TDLinkedList;
+		TDLinkedListNode<std::string*>* a = document.GetHead();
+		auto printDocumentCopy = new TDLinkedList<std::string*>;
 		do {
-			RefCounted<>* b = a->GetContent();
+			std::string* b = a->GetContent();
 			if (b != nullptr) {
 				printDocumentCopy->Append(b);
 			}
@@ -124,11 +123,11 @@ private:
 	auto PrintPrint() {
 		auto printDocumentCopy = printQueue->Dequeue();
 		if (printDocumentCopy == nullptr) { return; }
-		TDLinkedListNode* a = printDocumentCopy->GetHead()->GetNextElement();
+		TDLinkedListNode<std::string*>* a = printDocumentCopy->GetHead()->GetNextElement();
 		do {
-			RefCounted<>* b = a->GetContent();
+			std::string* b = a->GetContent();
 			if (b != nullptr) {
-				auto c = (std::string*)b->Content();
+				auto c = (std::string*)b;
 				std::cout << *c << std::endl;
 			}
 			a = a->GetNextElement();
@@ -147,14 +146,14 @@ private:
 		if (command == "+") {
 			resetRedoStack();
 			int32_t lineno;
-			auto textToAddToDocument = new RefCounted<void*>(new string());
+			auto textToAddToDocument = new string();
 
 			if (ss_userInput >> lineno) {
 			}
 			else {
 				lineno = 0;
 			}
-			getline(cin, *(std::string*)textToAddToDocument->Content());
+			getline(cin, *(std::string*)textToAddToDocument);
 
 			auto action = new TAction(Etype::add, textToAddToDocument, --lineno);
 			action->PreformOnDocument(&document);
@@ -214,7 +213,8 @@ private:
 public:
 	auto main() {
 		//LoadTextFile("C:/Users/Filip/Code/IKT203-portfolio/Assignment-01/readme.txt");
-		LoadTextFile(std::string(CMAKE_CURRENT_SOURCE_DIR).append("/Assignment-01/readme.txt"));
+		std::cout<<CMAKE_CURRENT_SOURCE_DIR;
+		LoadTextFile(std::string(CMAKE_CURRENT_SOURCE_DIR).append("/Option-1/readme.txt"));
 		//LoadTextFile("/home/filip/Development/C/IKT203-portfolio/Assignment-01/readme.txt");
 		while (GetUserInput());
 	}
