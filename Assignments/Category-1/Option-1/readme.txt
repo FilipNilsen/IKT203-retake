@@ -8,17 +8,52 @@ Make sure that your terminal supports VT100 ansi codes!.
         | |                               
         |_|                               
 Option/1 from Memory Space --- Simple text editor by Filip
-Commands:
-+....Add line; Press `+`, then ENTER 
-     and then the text you want to add and then ENTER
--....Remove line
-s....Show document
-re...Redo
-un...Undo
-sp...Spool print job
-pp...Print print job
 
-+ and - can be followed by a line number.
-For `-` it will remove that line.
-For `+`. If you put in `+ 2` your new line will become line 2
-and the current line 2 and the lines after it will be pushed back one line.
+This uses command line input.
+The command line can store values in a stack.
+1 -5 "hello"
+Will put the following on the stack:
+     (1 -5 "hello")
+The stack is typed (signed int/string).
+
+In forth tradition the stack is represented inside ().
+For notation on changes being done to the stack:
+     ( A -- B )
+Where A is the stack before and B is the stack after.
+For example: dup could be described with ( a -- a a).
+
+Commands:
+undo
+redo
+spool
+     Spools a print job to the print queue.
+print
+     Prints document from the print queue.
+show
+     Show document.
+(n -- ) add
+     Adds a line before line n (0 is the first line).
+     If n=-1 the line is added at the end.
+     For simplicity you get a prompt after the command runs to write the new line.
+     (No text is taken from the stack.)
+(n -- ) remove
+     Remove line n from the document.
+(n -- ) load
+     Load file with the filename n.
+
+These commands are interpreted with a string search tree.
+Each node has an array with one index for each printable ASCII char.
+Said tree will try to autocomplete words in asciibetical order:
+`sh` will resolve to `show`, and `re` to `redo` NOT `remove` (but `rem`=`remove`).
+
+Examples:
+------------
+6 add s
+Hello world!
+------------
+Adds 'Hello world!' before line 6 and displays the document.
+
+-------------------------
+"~/.ssh/config" load show
+-------------------------
+Load and show a file file.
