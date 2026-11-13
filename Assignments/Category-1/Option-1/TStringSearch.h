@@ -26,11 +26,7 @@ class TStringSearchNode {
             if (end == nullptr) {
                 for (auto& e: data) {
                     if (e != nullptr) {
-                        auto c = new char;
-                        *c = ' ';
-                        auto r = e->Get(c);
-                        delete c;
-                        return r;
+                        return e->Get(p_c);
                     }
                 }
                 throw std::out_of_range("");
