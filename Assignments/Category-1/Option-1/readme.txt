@@ -40,7 +40,10 @@ show
      Remove line n from the document.
 (n -- ) load
      Load file with the filename n.
-
+( -- n ) length
+     Puts the length of the document on the stack.
+( s e -- ) lines
+     Print lines s thru e-1.
 These commands are interpreted with a string search tree.
 Each node has an array with one index for each printable ASCII char.
 Said tree will try to autocomplete words in asciibetical order:
@@ -60,3 +63,9 @@ Load and show a file. As of writing this is equivalent to:
 -----------------------------
 "/home/filip/.ssh/config" l s
 -----------------------------
+
+------
+-1 add
+Hello
+------
+Add a new line to the document.

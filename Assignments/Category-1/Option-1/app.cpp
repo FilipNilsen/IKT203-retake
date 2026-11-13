@@ -52,6 +52,8 @@ private:
 		cmdParser->Insert(&TextEditor::AddLine, "add");
 		cmdParser->Insert(&TextEditor::RemoveLine, "remove");
 		cmdParser->Insert(&TextEditor::loadTextFileCmd, "load");
+		cmdParser->Insert(&TextEditor::GetLength, "length");
+		cmdParser->Insert(&TextEditor::GetLines, "lines");
 	}
 
 	private:
@@ -76,13 +78,14 @@ private:
 	};
 
 	void showDocument() {
+		std::cout<<std::endl;
 		TDLinkedListNode<std::string*>* a = document->GetHead();
 		uint16_t d = 0;
 		do {
 			std::string* b = a->GetContent();
 			if (b != nullptr) {
 				auto c = (std::string*)b;
-				std::cout << ++d << " " << vt100::CHA(3) << " " << *c << std::endl;
+				std::cout << d++ << " " << vt100::CHA(3) << " " << *c << std::endl;
 			}
 			a = a->GetNextElement();
 		} while (a != nullptr);
@@ -205,24 +208,53 @@ private:
 		undoStack->Push(action);
 	}
 
-	void Append() {
-		using namespace std;
-		resetRedoStack();
-		auto textToAddToDocument = new string();
-		getline(cin, *(std::string*)textToAddToDocument);
-		auto action = new TAction(Etype::add, textToAddToDocument, -1);
-		action->PreformOnDocument(document);
-		undoStack->Push(action);
-	}
-
 	void RemoveLine() {
 		uint16_t lineno;
 		resetRedoStack();
 		TAction* action = nullptr;
 		lineno = cmdStack->Pop()->AsInt;
-		action = new TAction(Etype::remove, nullptr, --lineno);
+		action = new TAction(Etype::remove, nullptr, lineno);
 		action->PreformOnDocument(document);
 		undoStack->Push(action);
+	}
+
+	void GetLength() {
+		unsigned int len = document->Length();
+		auto stack = new cmd_stack_t;
+		stack->type = 'i';
+		stack->AsInt = len;
+		cmdStack->Push(stack);
+	}
+
+	void GetLines() {
+		if (cmdStack->IsEmpty()){
+			std::cerr<<"Missing parameter!\n";
+			return;
+		}
+		auto end = cmdStack->Pop();
+		if (cmdStack->IsEmpty()){
+			std::cerr<<"Missing parameter!\n";
+			return;
+		}
+		auto start = cmdStack->Pop();
+
+		if (end->type != 'i') {
+			std::cerr<<"Wrong parameter type!\n";
+			return;
+		}
+		if (start->type != 'i') {
+			std::cerr<<"Wrong parameter type!\n";
+			return;
+		}
+		
+		int len = end->AsInt - start->AsInt;
+		int i = start->AsInt;
+		auto a = document->GetNodeAtIndex(start->AsInt);
+		while (i < end->AsInt) {
+			std::string* c = a->GetContent();
+			std::cout << i++ << " " << vt100::CHA(3) << " " << *c << std::endl;
+			a = a->GetNextElement();
+		}
 	}
 
 	bool GetUserInput() {

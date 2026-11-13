@@ -183,4 +183,16 @@ public:
         }
         return false;
     }
+
+    unsigned int Length() {
+        auto i = GetHead();
+        int counter = 0;
+        while (true) {
+            i = i->GetNextElement();
+            if (i == GetTail()) {
+                return counter;
+            }
+            ++counter;
+        }
+    }
 };

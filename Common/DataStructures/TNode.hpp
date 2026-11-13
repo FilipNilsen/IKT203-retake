@@ -7,8 +7,8 @@
 
 
 /**
-@brief Node for elements stored in the double linked list.
-@see TDLinkedList
+* @brief Node for elements stored in the double linked list.
+* @see TDLinkedList
 */
 template <typename T>
 class TDLinkedListNode {
