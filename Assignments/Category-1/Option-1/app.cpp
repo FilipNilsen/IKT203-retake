@@ -12,6 +12,7 @@
 #include <fstream> 
 #include "TAction.h"
 #include "TStringSearch.h"
+#include <cstring>
 
 #define INRANGE(element,start,end) element >= start && element <= end
 
@@ -25,13 +26,21 @@
 class TextEditor;
 typedef void (TextEditor::*TCommand)();
 
+typedef struct {
+	char type;
+	union {
+		int AsInt;
+		std::string* AsString;
+	};
+} cmd_stack_t;
+
 class TextEditor {
 private:
-	TDLinkedList<std::string*> document = TDLinkedList<std::string*>(true);
+	TDLinkedList<std::string*>* document = new TDLinkedList<std::string*>(true);
 	TStack<TAction*>* undoStack = new TStack<TAction*>();
 	TStack<TAction*>* redoStack = new TStack<TAction*>();
 	TQueue<TDLinkedList<std::string*>*>* printQueue = new TQueue<TDLinkedList<std::string*>*>;
-	TStack<int*>* cmdStack = new TStack<int*>();
+	TStack<cmd_stack_t*>* cmdStack = new TStack<cmd_stack_t*>();
 	TStringSearch<TCommand>* cmdParser = new TStringSearch<TCommand>();
 
 	public: TextEditor() {
@@ -42,6 +51,7 @@ private:
 		cmdParser->Insert(&TextEditor::showDocument, "show");
 		cmdParser->Insert(&TextEditor::AddLine, "add");
 		cmdParser->Insert(&TextEditor::RemoveLine, "remove");
+		cmdParser->Insert(&TextEditor::loadTextFileCmd, "load");
 	}
 
 	private:
@@ -54,7 +64,7 @@ private:
 	auto addTextToDocument(std::string* textToAdd, uint16_t lineNo) {
 		undoStack->Push(new TAction(Etype::add, textToAdd, lineNo));
 		resetRedoStack();
-		document.InsertBefore(lineNo, textToAdd);
+		document->InsertBefore(lineNo, textToAdd);
 		//std::cout << "add " << *(std::string*)textToAdd->Content() << " to line " << lineNo << std::endl;
 	};
 
@@ -62,11 +72,11 @@ private:
 		//std::cout << "add " << textToAdd << " to end\n";
 		undoStack->Push(new TAction(Etype::add, textToAdd, -1));
 		resetRedoStack();
-		document.Append(textToAdd);
+		document->Append(textToAdd);
 	};
 
 	void showDocument() {
-		TDLinkedListNode<std::string*>* a = document.GetHead();
+		TDLinkedListNode<std::string*>* a = document->GetHead();
 		uint16_t d = 0;
 		do {
 			std::string* b = a->GetContent();
@@ -87,7 +97,7 @@ private:
 		redoStack->Push(action);
 	
 		action->SwapType();
-		action->PreformOnDocument(&document);
+		action->PreformOnDocument(document);
 #ifdef STACK_DEBUG
 		undoStack->Dump();
 #endif
@@ -103,7 +113,7 @@ private:
 		undoStack->Push(action);
 		
 		action->SwapType();
-		action->PreformOnDocument(&document);
+		action->PreformOnDocument(document);
 #ifdef STACK_DEBUG
 		redoStack->Dump();
 #endif
@@ -119,7 +129,7 @@ private:
 		while (getline(f, *s)) {
 			r = new string(*s);
 			a = new TAction(Etype::add, r, -1);
-			a->PreformOnDocument(&document);
+			a->PreformOnDocument(document);
 			undoStack->Push(a);
 			s = new string();
 		}
@@ -127,8 +137,24 @@ private:
 		showDocument();
 	};
 
+	void loadTextFileCmd() {
+		if (cmdStack->IsEmpty()) {
+			std::cerr<<"Missing paramater!\n";
+			return;
+		}
+		auto file = cmdStack->Pop();
+		if (file->type != 's') {
+			std::cerr<<"Not string!\n";
+			return;
+		}
+		resetRedoStack();
+		delete document;
+		document = new TDLinkedList<std::string*>(true);
+		LoadTextFile(std::string(*file->AsString));
+	}
+
 	void SpoolPrint() {
-		TDLinkedListNode<std::string*>* a = document.GetHead();
+		TDLinkedListNode<std::string*>* a = document->GetHead();
 		auto printDocumentCopy = new TDLinkedList<std::string*>;
 		do {
 			std::string* b = a->GetContent();
@@ -161,12 +187,31 @@ private:
 		int lineno;
 		auto textToAddToDocument = new string();
 
-		lineno = *cmdStack->Pop();
+		if (cmdStack->IsEmpty()) {
+			std::cerr<<"No parameter in stack!\n";
+			return;
+		}
+		auto command = cmdStack->Pop();
+		if (command->type != 'i') {
+			std::cerr<<"Parameter in stack is wrong type ("<<command->type<<")!\n";
+			return;
+		}
+		lineno = command->AsInt;
 
 		getline(cin, *(std::string*)textToAddToDocument);
 
-		auto action = new TAction(Etype::add, textToAddToDocument, --lineno);
-		action->PreformOnDocument(&document);
+		auto action = new TAction(Etype::add, textToAddToDocument, lineno);
+		action->PreformOnDocument(document);
+		undoStack->Push(action);
+	}
+
+	void Append() {
+		using namespace std;
+		resetRedoStack();
+		auto textToAddToDocument = new string();
+		getline(cin, *(std::string*)textToAddToDocument);
+		auto action = new TAction(Etype::add, textToAddToDocument, -1);
+		action->PreformOnDocument(document);
 		undoStack->Push(action);
 	}
 
@@ -174,9 +219,9 @@ private:
 		uint16_t lineno;
 		resetRedoStack();
 		TAction* action = nullptr;
-		lineno = *cmdStack->Pop();
+		lineno = cmdStack->Pop()->AsInt;
 		action = new TAction(Etype::remove, nullptr, --lineno);
-		action->PreformOnDocument(&document);
+		action->PreformOnDocument(document);
 		undoStack->Push(action);
 	}
 
@@ -186,16 +231,53 @@ private:
 		string userInput;
 		getline(cin, userInput);
 		stringstream ss_userInput(userInput);
-		// const char* p_i = userInput.c_str();
-		while (ss_userInput >> token) {
-			if ((INRANGE(token[0], '0', '9')) || token[0] == '-') {
-				int number = std::stoi(token);
-				int* p_number = new int(number);
-				cmdStack->Push(p_number);
+		const char* p_i = userInput.c_str();
+		while (*p_i != 0) {
+			if (*p_i == '"') {
+				p_i++;
+				const char* p_end = p_i;
+				while (*p_end != '"') {
+					p_end++;
+					if (*p_end == 0) {
+						cerr<<"Unterminated string!\n";
+						return true;
+					}
+				}
+				auto s = new string(p_i, p_end-p_i);
+				auto e = new cmd_stack_t;
+				e->type = 's';
+				e->AsString = s;
+				cmdStack->Push(e);
+				p_i = p_end + 1;
 			}
+
+			else if ((INRANGE(*p_i, '0', '9')) || *p_i == '-') {
+				const char* p_end = p_i + 1;
+				while (INRANGE(*p_end, '0', '9')) {
+					p_end++;
+				}
+				auto token = string(p_i, p_end - p_i);
+				int number = std::stoi(token);
+				auto e = new cmd_stack_t;
+				e->type = 'i';
+				e->AsInt = number;
+				cmdStack->Push(e);
+				p_i = p_end;
+			}
+
+			else if (*p_i <= ' ') {
+				p_i++;
+			}
+
 			else {
+				const char* p_end = strchr(p_i, ' ');
+				if (p_end == nullptr) {
+					p_end = strchr(p_i, 0);
+				}
+				token = string(p_i, p_end - p_i);
 				// Got AI to fix this because it's a complicated one.
 				(this->*(cmdParser->Get(token.c_str())))();
+				p_i = p_end;
 			}
 		}
 		return true;
