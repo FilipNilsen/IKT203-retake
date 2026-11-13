@@ -5,6 +5,7 @@ template <typename T>
 class TStringSearchNode {
     private: TStringSearchNode* data['~'-' ' + 1] = {0}; //!< ASCII printable range long array of T.
     private: T end = nullptr;
+    public: T fallback = nullptr;
 
     private: bool InRange(char c) {
         if (c == 0) {
@@ -23,6 +24,11 @@ class TStringSearchNode {
         InRange(*p_c);
         if (*p_c == 0) {
             if (end == nullptr) {
+                for (auto& e: data) {
+                    if (e != nullptr) {
+                        return e->Get(' ');
+                    }
+                }
                 throw std::out_of_range("");
             }
             return end;
