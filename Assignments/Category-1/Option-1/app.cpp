@@ -11,6 +11,9 @@
 #include <DataStructures/TQueue.hpp>
 #include <fstream> 
 #include "TAction.h"
+#include "TStringSearch.h"
+
+#define INRANGE(element,start,end) element >= start && element <= end
 
 // The 
 //   Option/1
@@ -19,12 +22,29 @@
 
 //#define STACK_DEBUG
 
+class TextEditor;
+typedef void (TextEditor::*TCommand)();
+
 class TextEditor {
 private:
 	TDLinkedList<std::string*> document = TDLinkedList<std::string*>(true);
 	TStack<TAction*>* undoStack = new TStack<TAction*>();
 	TStack<TAction*>* redoStack = new TStack<TAction*>();
 	TQueue<TDLinkedList<std::string*>*>* printQueue = new TQueue<TDLinkedList<std::string*>*>;
+	TStack<int*>* cmdStack = new TStack<int*>();
+	TStringSearch<TCommand>* cmdParser = new TStringSearch<TCommand>();
+
+	public: TextEditor() {
+		cmdParser->Insert(&TextEditor::Undo, "undo");
+		cmdParser->Insert(&TextEditor::PrintPrint, "print");
+		cmdParser->Insert(&TextEditor::SpoolPrint, "spool");
+		cmdParser->Insert(&TextEditor::Redo, "redo");
+		cmdParser->Insert(&TextEditor::showDocument, "show");
+		cmdParser->Insert(&TextEditor::AddLine, "add");
+		cmdParser->Insert(&TextEditor::RemoveLine, "remove");
+	}
+
+	private:
 
 	auto resetRedoStack(){
 		delete redoStack;
@@ -45,7 +65,7 @@ private:
 		document.Append(textToAdd);
 	};
 
-	auto showDocument() {
+	void showDocument() {
 		TDLinkedListNode<std::string*>* a = document.GetHead();
 		uint16_t d = 0;
 		do {
@@ -58,7 +78,7 @@ private:
 		} while (a != nullptr);
 	}
 
-	auto Undo() {
+	void Undo() {
 		if (undoStack->IsEmpty()) {
 			std::cerr << "Nothing to undo" << std::endl;
 			return;
@@ -74,7 +94,7 @@ private:
 		showDocument();
 	}
 
-	auto Redo() {
+	void Redo() {
 		if (redoStack->IsEmpty()) {
 			std::cerr << "Nothing to redo" << std::endl;
 			return;
@@ -107,7 +127,7 @@ private:
 		showDocument();
 	};
 
-	auto SpoolPrint() {
+	void SpoolPrint() {
 		TDLinkedListNode<std::string*>* a = document.GetHead();
 		auto printDocumentCopy = new TDLinkedList<std::string*>;
 		do {
@@ -120,7 +140,7 @@ private:
 		printQueue->Enqueue(printDocumentCopy);
 	}
 
-	auto PrintPrint() {
+	void PrintPrint() {
 		auto printDocumentCopy = printQueue->Dequeue();
 		if (printDocumentCopy == nullptr) { return; }
 		TDLinkedListNode<std::string*>* a = printDocumentCopy->GetHead()->GetNextElement();
@@ -135,78 +155,49 @@ private:
 		delete printDocumentCopy;
 	}
 
+	void AddLine() {
+		using namespace std;
+		resetRedoStack();
+		int lineno;
+		auto textToAddToDocument = new string();
+
+		lineno = *cmdStack->Pop();
+
+		getline(cin, *(std::string*)textToAddToDocument);
+
+		auto action = new TAction(Etype::add, textToAddToDocument, --lineno);
+		action->PreformOnDocument(&document);
+		undoStack->Push(action);
+	}
+
+	void RemoveLine() {
+		uint16_t lineno;
+		resetRedoStack();
+		TAction* action = nullptr;
+		lineno = *cmdStack->Pop();
+		action = new TAction(Etype::remove, nullptr, --lineno);
+		action->PreformOnDocument(&document);
+		undoStack->Push(action);
+	}
+
 	bool GetUserInput() {
 		using namespace std;
-		string command;
+		string token;
 		string userInput;
 		getline(cin, userInput);
 		stringstream ss_userInput(userInput);
-		ss_userInput >> command;
-
-		if (command == "+") {
-			resetRedoStack();
-			int32_t lineno;
-			auto textToAddToDocument = new string();
-
-			if (ss_userInput >> lineno) {
+		// const char* p_i = userInput.c_str();
+		while (ss_userInput >> token) {
+			if ((INRANGE(token[0], '0', '9')) || token[0] == '-') {
+				int number = std::stoi(token);
+				int* p_number = new int(number);
+				cmdStack->Push(p_number);
 			}
 			else {
-				lineno = 0;
+				// Got AI to fix this because it's a complicated one.
+				(this->*(cmdParser->Get(token.c_str())))();
 			}
-			getline(cin, *(std::string*)textToAddToDocument);
-
-			auto action = new TAction(Etype::add, textToAddToDocument, --lineno);
-			action->PreformOnDocument(&document);
-			undoStack->Push(action);
-			return true;
 		}
-
-		if (command == "s") {
-			showDocument();
-			return true;
-		}
-
-		if (command == "-") {
-			uint16_t lineno;
-			resetRedoStack();
-			TAction* action = nullptr;
-			if (ss_userInput >> lineno) {
-				//document.Remove(--lineno); // -- to convert 1 index to 0 index
-				action = new TAction(Etype::remove, nullptr, --lineno);
-			}
-			else {
-				//document.RemoveLast();
-				action = new TAction(Etype::remove, nullptr, -1);
-			}
-			action->PreformOnDocument(&document);
-			undoStack->Push(action);
-			return true;
-		}
-
-		if (command == "q") {
-			return false;
-		}
-
-		if (command == "un") {
-			Undo();
-			return true;
-		}
-
-		if (command == "re") {
-			Redo();
-			return true;
-		}
-
-		if (command == "sp") {
-			SpoolPrint();
-			return true;
-		}
-
-		if (command == "pp") {
-			PrintPrint();
-			return true;
-		}
-
 		return true;
 	};
 

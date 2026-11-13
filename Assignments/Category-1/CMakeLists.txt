@@ -19,6 +19,7 @@ if(BUILD_CATEGORY_1_OPTION_1)
         "Option-1/vt100.cpp"
         "Option-1/VT100.h"
         "Option-1/TAction.h"
+        "Option-1/TStringSearch.h"
     )
     target_compile_definitions(Category-1 PRIVATE CMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
     target_compile_definitions(Category-1 PRIVATE "CATEGORY_1_OPTION=1")
