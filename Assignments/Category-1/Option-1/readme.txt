@@ -53,7 +53,10 @@ Hello world!
 ------------
 Adds 'Hello world!' before line 6 and displays the document.
 
--------------------------
-"~/.ssh/config" load show
--------------------------
-Load and show a file file.
+-----------------------------------
+"/home/filip/.ssh/config" load show
+-----------------------------------
+Load and show a file. As of writing this is equivalent to:
+-----------------------------
+"/home/filip/.ssh/config" l s
+-----------------------------
