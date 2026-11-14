@@ -6,10 +6,11 @@
 #include <iostream>
 
 /** 
-Binary search tree
-@tparam T Data that is stored in BST, Needs to be a pointer type.
-@tparam K Datatype used for key, must support comparison with <,>,==.
-@bug Does not handle comparisons between std::strings that contain ���.
+* @brief Binary search tree.
+* @tparam T Data that is stored in BST, Needs to be a pointer type.
+* @tparam K Datatype used for key, must support comparison with <,>,==.
+* @bug Does not handle comparisons between std::strings that contain ���.
+* @note Has no destructor.
 */
 template <typename K, typename T>
 class TBST: public TTreeBase<TBST<K,T>, K, T> {
@@ -40,7 +41,7 @@ public:
 	/**
 	@brief Delete content in node with a value same as key.
 	@note This does not delete the TBST object itself, just the content that it points to.
-	@param key Key to search for
+	@param key Key to search for.
 	*/
 	void Delete(K key);
 
@@ -129,6 +130,7 @@ bool TBST<K,T>::Insert(TBST* bst)
 		if (this->right == nullptr) {
 			this->right = bst;
 			bst->parent = this;
+			return true;
 		}
 		return this->right->Insert(bst);
 	}
@@ -136,6 +138,7 @@ bool TBST<K,T>::Insert(TBST* bst)
 		if (this->left == nullptr) {
 			this->left = bst;
 			bst->parent = this;
+			return true;
 		}
 		return this->left->Insert(bst);
 	}

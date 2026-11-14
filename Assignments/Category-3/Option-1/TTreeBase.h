@@ -1,5 +1,5 @@
 #pragma once
-
+#include <iostream>
 /**
 @tparam C Child class type.
 */
