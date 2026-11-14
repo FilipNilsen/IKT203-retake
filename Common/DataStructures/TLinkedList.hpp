@@ -7,27 +7,7 @@
 #include "TNode.hpp" // Your node class
 
 /**
-* @file   TLinkedList.hpp
-* @brief  Dear student, this file contains the definition of the TLinkedList class template, which serves as a doubly-linked list implementation for storing elements of type T.
-*					You will create this as a template class typically holding methods for appending, prepending, searching, and iterating over elements.
-*					Type of linked list is op to you, you must clean (delete) your data yourself so be wize about the type of T you choose to use.
-*         I recommend to implenet a "isOwner" boolean variable to determine if the list is responsible for deleting the data or not.
-*					Please ask for help in Discord if you have any questions or need assistance with the implementation.
-* @tparam T The type of elements stored in the linked list.
-*/
-
-
-/**
 @brief Double linked list
-
-The text editor is highly coupeled to this class.
-While writing this I also had issues with templates so i wrote this with high coupling to RefCounted.
-
-Some functions return RefCounted*, others return a TDLinkedListNode*, while others return the data reference counted by RefCounted.
-The last case is problematic because you can't then do any modifications to the reference count.
-
-@todo Rewrite with templating and decouple from RefCounted.
-@todo Undeprecate ownsData. I'm planning to write a RefCounted wrapper class whoose destructor calls RefCounted::Dec() anyway.
 @author Filip
 */
 template <typename T>
@@ -79,6 +59,7 @@ public:
         */
 
         auto newElement = new TDLinkedListNode<T>(aMovie, tail);
+        newElement->ownsData = this->ownsData;
         newElement->SetPreviousElementTo(tail->GetPreviousElement());
         tail->SetPreviousElementTo(newElement);
         newElement->GetPreviousElement()->SetNextElementTo(newElement);
@@ -103,29 +84,31 @@ public:
         3. newElement.next.previous=newElement
          */
 
-        auto newElement = new TDLinkedListNode<T>(aTMovie, head->GetNextElement(), head, ownsData);
+        auto newElement = new TDLinkedListNode<T>(aTMovie, head->GetNextElement(), head, this->ownsData);
         head->SetNextElementTo(newElement);
         newElement->GetNextElement()->SetPreviousElementTo(newElement);
     }
 
     void InsertAfter(size_t anIndex, T aNewElement) {
-        //Started as copy of function above
-        auto after = GetNodeAtIndex(anIndex);
-        auto newElement = new TDLinkedListNode<T>(aNewElement, after->GetNextElement(), after, ownsData);
-        newElement->GetPreviousElement()->SetNextElementTo(newElement);  
-        after->SetPreviousElementTo(newElement);
+        // A x B insert x inbetween A and B.
+        auto A = GetNodeAtIndex(anIndex);
+        auto B = A->GetNextElement();
+        auto x = new TDLinkedListNode<T>(aNewElement, B, A, this->ownsData);
+        A->SetNextElementTo(x);  
+        B->SetPreviousElementTo(x);
     }
 
     void InsertBefore(size_t anIndex, T aNewElement) {
-        //Started as copy of function above
-        auto before = GetNodeAtIndex(anIndex);
-        auto newElement = new TDLinkedListNode<T>(aNewElement, before, before->GetPreviousElement(), ownsData);
-        before->SetPreviousElementTo(newElement);
-        newElement->GetPreviousElement()->SetNextElementTo(newElement);
+        // A x B insert x.
+        auto B = GetNodeAtIndex(anIndex);
+        auto A = B->GetPreviousElement();
+        auto x = new TDLinkedListNode<T>(aNewElement, B, A, this->ownsData);
+        B->SetPreviousElementTo(x);
+        A->SetNextElementTo(x);
     }
 
     /**
-     * @returns The content of the RefCount object at `aIndex`
+     * @returns The content of the node at aIndex.
      */
     void* GetAtIndex(size_t aIndex) {
         auto a = GetNodeAtIndex(aIndex);
@@ -136,7 +119,7 @@ public:
     }
 
     /**
-     * @returns The TDLinkedListNode<T>* at `aIndex`
+     * @returns The TDLinkedListNode<T>* at aIndex, or nullptr if out of range.
      */
     TDLinkedListNode<T>* GetNodeAtIndex(size_t aIndex) {
         auto currentIndex = this->head->GetNextElement();
@@ -144,6 +127,9 @@ public:
             if (currentIndex->GetContent() == nullptr)
                 return nullptr;
             currentIndex = currentIndex->GetNextElement();
+        }
+        if (currentIndex == GetTail()) {
+            return nullptr;
         }
         return currentIndex;
     }
