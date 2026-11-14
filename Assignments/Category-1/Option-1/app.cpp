@@ -209,10 +209,18 @@ private:
 	}
 
 	void RemoveLine() {
-		uint16_t lineno;
+		if (cmdStack->IsEmpty()) {
+			std::cerr<<"No parameter in stack!\n";
+			return;
+		}
+		auto command = cmdStack->Pop();
+		if (command->type != 'i') {
+			std::cerr<<"Parameter in stack is wrong type ("<<command->type<<")!\n";
+			return;
+		}
+		int lineno = command->AsInt;
 		resetRedoStack();
 		TAction* action = nullptr;
-		lineno = cmdStack->Pop()->AsInt;
 		action = new TAction(Etype::remove, nullptr, lineno);
 		action->PreformOnDocument(document);
 		undoStack->Push(action);
@@ -246,7 +254,7 @@ private:
 			std::cerr<<"Wrong parameter type!\n";
 			return;
 		}
-		
+
 		int len = end->AsInt - start->AsInt;
 		int i = start->AsInt;
 		auto a = document->GetNodeAtIndex(start->AsInt);
@@ -318,7 +326,7 @@ private:
 public:
 	auto main() {
 		//LoadTextFile("C:/Users/Filip/Code/IKT203-portfolio/Assignment-01/readme.txt");
-		std::cout<<CMAKE_CURRENT_SOURCE_DIR;
+		std::cout<<CMAKE_CURRENT_SOURCE_DIR<<std::endl;
 		LoadTextFile(std::string(CMAKE_CURRENT_SOURCE_DIR).append("/Option-1/readme.txt"));
 		//LoadTextFile("/home/filip/Development/C/IKT203-portfolio/Assignment-01/readme.txt");
 		while (GetUserInput());
