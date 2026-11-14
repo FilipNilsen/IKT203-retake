@@ -1,13 +1,13 @@
 #include "./app.h"
 #include <iostream>
-#include "NewStuff/TAVL.h"
-#include "NewStuff/TBST.h"
+#include "TAVL.h"
+#include "TBST.h"
 #include <sstream>
 #include <fstream>
-#include <PrevAssignments/TQueue.h>
-#include <SharedLib.h>
-#include <PrevAssignments/TStack.h>
+#include "DataStructures/TQueue.hpp"
+#include "DataStructures/TStack.hpp"
 #include "search.h"
+#include "StructureReader.h"
 
 struct TEmployee {
 	std::string firstName;
@@ -70,9 +70,9 @@ int RunApp(int argc, char* argv[]) {
 	srand(time(0));
 
 	//readNamesFromFile("C:/Users/Filip/Code/IKT203-portfolio/Assignment-03/random_names.txt", &NameRead);
-	std::string filename(CMAKE_CURRENT_SOURCE_DIR);
-	filename.append("/Assignment-03/random_names.txt");
-	readNamesFromFile(filename, & NameRead);
+	// std::string filename(CMAKE_CURRENT_SOURCE_DIR);
+	// filename.append("/Assignment-03/random_names.txt");
+	ReadNamesFromFile(&NameRead);
 	
 	Dump::Dump<>(list);
 	Dump::Dump<EmployeeBST*>(bstList);
