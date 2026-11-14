@@ -4,49 +4,46 @@
 #include "DebugUtils.h" // This is the provided debug utility for logging
 #include <stdexcept> // This is for throwing exceptions when needed
 
-
-/**
-* @file   TStack.hpp
-* @brief  Dear student, this file contains the definition of the TStack class template, which serves as a stack implementation for storing elements of type T.
-*         Be aware that this stack is implemented using a linked list, and it does not own the data it stores.
-*         You will create this as a template class typically holding methods for pushing, popping, peeking, and checking the size of the stack.
-*         Please ask for help in Discord if you have any questions or need assistance with the implementation.
-*/
-
+/// @brief A stack.
+/// @tparam T Type to store on stack.
+/// @tparam MAX_SIZE Size of the stack in number of T-elements.
 template <typename T, int MAX_SIZE=100>
 class TStack {
 private:
     T storedData[MAX_SIZE];
-    T* top = storedData-1;  //Top points to the top element in the stack.
+    T* top = storedData;  //Top points to the top element in the stack.
 
 public:
     /**
-     * Time: O(1), Space: O(1)
-     * @param item Item to add to TStack
-     * @return false if the TStack is full
+     * Time: O(1), Space: O(1).
+     * @param item Item to add to TStack.
+     * @return false if the TStack is full.
      */
     bool Push(T item) {
-        if (top >= storedData + MAX_SIZE-1) {
+        if (top > storedData[MAX_SIZE]) {
             std::cerr<<"Stack is full"<<std::endl;
             return false;
         }
-        ++top;
         *top = item;
+        ++top;
         return true;
     }
+
     bool Add(T item) {
         return Push(item);
     }
 
     /**
-     * Time: O(1), Space: O(1)
-     * @return Item that was popped from the stack
+     * Time: O(1), Space: O(1).
+     * @return Item that was popped from the stack.
+     * @pre Stack isn't empty.
      */
     T Pop() {
-        T return_value = *top;
         --top;
+        T return_value = *top;
         return return_value;
     }
+
     T Take() {
         return Pop();
     }
@@ -56,10 +53,10 @@ public:
     }
 
     bool IsEmpty() const {
-        if (top < storedData) {
+        if (top <= storedData) {
             return true;
         }
-        if (top >= storedData) {
+        if (top > storedData) {
             return false;
         }
         else
@@ -68,7 +65,7 @@ public:
 
     void Dump() const {
         const T* i = storedData;
-        while (i <= top) {
+        while (i < top) {
             //printf("%i ", *i);
             std::cout<<*i<<" ";
             //std::cout << "\033[210G" << *i << std::endl;

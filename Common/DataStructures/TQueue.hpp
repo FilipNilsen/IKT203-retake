@@ -5,16 +5,9 @@
 #include <stdexcept> // This is for throwing exceptions when needed
 
 /**
-* @file   TQueue.hpp
-* @brief  Dear student, this file contains the definition of the TQueue class template, which serves as a queue implementation for storing elements of type T.
-*         Be aware that this queue is implemented using a linked list, and it does not own the data it stores.
-*         You will create this as a template class typically holding methods for enqueueing, dequeueing, peeking, and checking the size of the queue.
-*         Please ask for help in Discord if you have any questions or need assistance with the implementation.
-*/
-
-/**
- * A queue
- * @param T Data type to store. Must be a pointer.
+ * @brief A queue.
+ * @tparam T Data type to store. Must be a pointer.
+ * @tparam MAX_SIZE The size in elements of the array used for the stack.
  */
 template <typename T, int MAX_SIZE=100>
 class TQueue {
@@ -26,31 +19,33 @@ private:
 
 public:
     /**
-     * Time: O(1), Space: O(1)
-     * @param item Item to enqueue
-     * @return Whether it failed or succeeded
+     * Time: O(1), Space: O(1).
+     * @param item Item to enqueue.
+     * @return Whether it failed or succeeded.
      */
     bool Enqueue(T item) {
-        //Wraparound
-        if (back >= storedData + MAX_SIZE) {
-            back = storedData;
-        }
         if (numberOfElements>=MAX_SIZE) {
             std::cerr<<"Queue is full."<<std::endl;
             return false;
+        }
+        //Wraparound
+        if (back >= storedData + MAX_SIZE) {
+            back = storedData;
         }
         *back = item;
         ++back;
         ++numberOfElements;
         return true;
     }
+
     bool Add(T item) {
         return Enqueue(item);
     }
 
     /**
-     * Time: O(1), Space: O(1)
-     * @return Element that was dequeued
+     * Time: O(1), Space: O(1).
+     * @return Element that was dequeued.
+     * @pre Queue is not empty.
      */
     T Dequeue() {
         //Wraparound
@@ -62,6 +57,7 @@ public:
         --numberOfElements;
         return return_value;
     }
+    
     T Take() {
         return Dequeue();
     }
