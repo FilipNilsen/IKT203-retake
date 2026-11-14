@@ -3,10 +3,12 @@
 #include "TLinkedList.hpp" // This is your linked list implementation
 #include "DebugUtils.h" // This is the provided debug utility for logging
 #include <stdexcept> // This is for throwing exceptions when needed
+#include <iostream>
 
 /// @brief A stack.
 /// @tparam T Type to store on stack.
 /// @tparam MAX_SIZE Size of the stack in number of T-elements.
+/// @pre T is a pointer type.
 template <typename T, int MAX_SIZE=100>
 class TStack {
 private:
@@ -20,7 +22,7 @@ public:
      * @return false if the TStack is full.
      */
     bool Push(T item) {
-        if (top > storedData[MAX_SIZE]) {
+        if (top >= storedData + MAX_SIZE) {
             std::cerr<<"Stack is full"<<std::endl;
             return false;
         }
@@ -35,10 +37,12 @@ public:
 
     /**
      * Time: O(1), Space: O(1).
-     * @return Item that was popped from the stack.
-     * @pre Stack isn't empty.
+     * @return Item that was popped from the stack. Or nullptr if it's empty.
      */
     T Pop() {
+        if (this->IsEmpty()) {
+            return nullptr;
+        }
         --top;
         T return_value = *top;
         return return_value;
@@ -48,8 +52,13 @@ public:
         return Pop();
     }
 
+    /// @brief Take a look at the item at the top of the stack.
+    /// @return The item at the top, or nullptr if the stack is empty.
     T Peek() const {
-        return *top;
+        if (this->IsEmpty()) {
+            return nullptr;
+        }
+        return *(top-1);
     }
 
     bool IsEmpty() const {
@@ -79,7 +88,7 @@ public:
     @note Deletes every item currently in the stack if T is a pointer type.
     */
     ~TStack() {
-        if (std::is_pointer<T>()) {
+        if constexpr (std::is_pointer_v<T>) {
             while (!IsEmpty()) {
                 delete Pop();
             }

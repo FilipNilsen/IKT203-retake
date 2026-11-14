@@ -3,11 +3,13 @@
 #include "TLinkedList.hpp" // This is your linked list implementation
 #include "DebugUtils.h" // This is the provided debug utility for logging
 #include <stdexcept> // This is for throwing exceptions when needed
+#include <iostream>
 
 /**
  * @brief A queue.
- * @tparam T Data type to store. Must be a pointer.
+ * @tparam T Data type to store.
  * @tparam MAX_SIZE The size in elements of the array used for the stack.
+ * @pre T is a pointer type.
  */
 template <typename T, int MAX_SIZE=100>
 class TQueue {
@@ -44,10 +46,12 @@ public:
 
     /**
      * Time: O(1), Space: O(1).
-     * @return Element that was dequeued.
-     * @pre Queue is not empty.
+     * @return Element that was dequeued, or nullptr if the queue is empty.
      */
     T Dequeue() {
+        if (this->IsEmpty()) {
+            return nullptr;
+        }
         //Wraparound
         if (front >= storedData + MAX_SIZE) {
             front = storedData;
@@ -57,7 +61,7 @@ public:
         --numberOfElements;
         return return_value;
     }
-    
+
     T Take() {
         return Dequeue();
     }
@@ -99,7 +103,7 @@ public:
     @note Deletes every item currently in the queue if T is a pointer type.
     */
     ~TQueue() {
-        if (std::is_pointer<T>::value) {
+        if constexpr (std::is_pointer_v<T>) {
             while (!IsEmpty()) {
                 delete Dequeue();
             }

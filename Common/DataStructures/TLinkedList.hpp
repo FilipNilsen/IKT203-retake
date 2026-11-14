@@ -92,6 +92,9 @@ public:
     void InsertAfter(size_t anIndex, T aNewElement) {
         // A x B insert x inbetween A and B.
         auto A = GetNodeAtIndex(anIndex);
+        if (A==nullptr) {
+            throw std::out_of_range("");
+        }
         auto B = A->GetNextElement();
         auto x = new TDLinkedListNode<T>(aNewElement, B, A, this->ownsData);
         A->SetNextElementTo(x);  
@@ -101,6 +104,9 @@ public:
     void InsertBefore(size_t anIndex, T aNewElement) {
         // A x B insert x.
         auto B = GetNodeAtIndex(anIndex);
+        if (B==nullptr) {
+            throw std::out_of_range("");
+        }
         auto A = B->GetPreviousElement();
         auto x = new TDLinkedListNode<T>(aNewElement, B, A, this->ownsData);
         B->SetPreviousElementTo(x);
@@ -151,6 +157,9 @@ public:
      */
     T GetAndRemoveAtIndex(size_t aIndex){
         auto toDelete = GetNodeAtIndex(aIndex);
+        if (toDelete==nullptr) {
+            throw std::out_of_range("");
+        }
         toDelete->GetPreviousElement()->SetNextElementTo(toDelete->GetNextElement());
         toDelete->GetNextElement()->SetPreviousElementTo(toDelete->GetPreviousElement());
         auto content = toDelete->GetContent();

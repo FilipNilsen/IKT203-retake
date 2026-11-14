@@ -10,7 +10,6 @@
 * @tparam T Data that is stored in BST, Needs to be a pointer type.
 * @tparam K Datatype used for key, must support comparison with <,>,==.
 * @bug Does not handle comparisons between std::strings that contain ���.
-* @note Has no destructor.
 */
 template <typename K, typename T>
 class TBST: public TTreeBase<TBST<K,T>, K, T> {
