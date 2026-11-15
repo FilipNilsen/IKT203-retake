@@ -67,6 +67,9 @@ public:
     }
 
     T Peek() const {
+        if (this->IsEmpty()) {
+            return nullptr;
+        }
         return *front;
     }
 
