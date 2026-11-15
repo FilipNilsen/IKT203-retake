@@ -21,7 +21,7 @@ public:
 	explicit TBST(K key, TBST* parent = nullptr) : TTreeBase<TBST<K,T>,K,T>(key, parent) {};
 	explicit TBST(K key, T data, TBST* parent = nullptr) : TTreeBase<TBST<K,T>,K,T>(key, data, parent) {};
 
-	~TBST();
+	~TBST() override;
 
 	/**
 	@brief Replace the left or right node with a new one.

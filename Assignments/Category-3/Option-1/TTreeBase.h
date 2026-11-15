@@ -14,6 +14,7 @@ protected:
 	T content = nullptr;
 	K value;
 public:
+	virtual ~TTreeBase() {}
 	C* Right() { return right; }
 	C* Left() { return left; }
 	T GetContent() { return content; }
