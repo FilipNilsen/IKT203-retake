@@ -4,6 +4,7 @@
 #include "DataStructures/PriorityQueue.h"
 #include "TNode.h"
 #include "StructureReader.h"
+#include "TMinHeap.h"
 
 static constexpr std::string_view AssignmentOption = "Option 2: Data Center Network Monitor.";
 
@@ -47,7 +48,7 @@ static bool EdgeReadCallback(const int aIndex, const int aTotalCount, const std:
 }
 
 void Dijkstra(std::string start="Seoul Hub") {
-	auto pq = new TPriorityQueue<float, TNode*>;
+	auto pq = new TMinHeap<TNode*>;
 	TNode* node = nodes->Search(start);
 	node->UpdateShortestPath(0);
 	TNode* neighbour= nullptr;
@@ -63,13 +64,11 @@ void Dijkstra(std::string start="Seoul Hub") {
 				std::cout << "Has neighbour " << *neighbour << "\n";
 				
 				if (visited->Search(i) == nullptr) {
-					pq->Enqueue(
-						neighbour->GetShortestPath(),
-						neighbour);
+					pq->Insert(neighbour);
 				}
 			}
 		}
-		neighbour = pq->Dequeue();
+		neighbour = pq->Get();
 		if (neighbour == nullptr) { 
 			std::cout << "\nSummary:\n";
 			for (size_t i = 0; i < 50; ++i) {

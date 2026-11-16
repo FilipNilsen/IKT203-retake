@@ -31,6 +31,21 @@ public:
 		shortestPath = FLT_MAX;
 		return this;
 	}
+
+	bool operator>(TNode& r)
+	{
+		return this->GetShortestPath() > r.GetShortestPath();
+	}
+
+	bool operator<(TNode& r)
+	{
+		return this->GetShortestPath() < r.GetShortestPath();
+	}
+
+	bool operator==(TNode& r)
+	{
+		return this->GetShortestPath() == r.GetShortestPath();
+	}
 };
 
 std::ostream& operator<<(std::ostream& os, TNode& node) {
