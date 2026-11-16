@@ -189,4 +189,37 @@ public:
             ++counter;
         }
     }
+
+    // Got AI to do this because it's a lot of boilerplate for iterator support:
+    struct Iterator {
+        using iterator_category = std::bidirectional_iterator_tag;
+        using difference_type   = std::ptrdiff_t;
+        using value_type        = T;
+        using pointer           = T*;
+        using reference         = T&;
+
+        T operator*() const { return m_ptr->GetContent(); }
+        Iterator& operator++() { m_ptr = m_ptr->GetNextElement(); return *this; }
+        Iterator operator++(int) { Iterator temp = *this; ++(*this); return temp; }
+        Iterator& operator--() { m_ptr = m_ptr->GetPreviousElement(); return *this; }
+        Iterator operator--(int) { Iterator temp = *this; --(*this); return temp; }
+        bool operator==(const Iterator& other) const { return m_ptr == other.m_ptr; }
+        bool operator!=(const Iterator& other) const { return m_ptr != other.m_ptr; }
+
+        Iterator(TDLinkedListNode<T>* ptr) : m_ptr(ptr) {}
+        Iterator() = default;
+
+    private:
+        TDLinkedListNode<T>* m_ptr = nullptr;
+    };
+
+    public: Iterator begin()
+    {
+        return Iterator(head->GetNextElement());
+    }
+
+    public: Iterator end()
+    {
+        return Iterator(tail);
+    }
 };
