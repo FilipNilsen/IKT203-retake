@@ -1,5 +1,7 @@
 #pragma once
 #include <cfloat>
+#include "DataStructures/TLinkedList.hpp"
+#include "TEdge.h"
 
 class TNode;
 std::ostream& operator<<(std::ostream& os, TNode& node);
@@ -9,7 +11,10 @@ private:
 	std::string name;
 	uint32_t index;
 	float shortestPath = FLT_MAX;
+
 public:
+	bool visited = false;
+	TDLinkedList<TEdge*> edges;
 	TNode(uint32_t _index, std::string _name):index(_index), name(_name) {};
 	std::string GetName() { return name; }
 	uint32_t GetIndex() { return index; }

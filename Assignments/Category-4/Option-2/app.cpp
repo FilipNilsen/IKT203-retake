@@ -5,12 +5,12 @@
 #include "TNode.h"
 #include "StructureReader.h"
 #include "TMinHeap.h"
+#include <cfloat>
+#include "TEdge.h"
 
 static constexpr std::string_view AssignmentOption = "Option 2: Data Center Network Monitor.";
 
 TBST< std::string, TNode* >* nodes = nullptr;
-TBST< uint32_t, TNode* >* nodesIdx = nullptr;
-float edges[50][50] = { 0 };
 
 /**
  * @brief Callback function to process one node.
@@ -22,12 +22,10 @@ static bool NodeReadCallback(const int aIndex, const int aTotalCount, const std:
 	
 	if (nodes == nullptr) {
 		nodes = new TBST<std::string, TNode*>(aNode, node, nullptr);
-		nodesIdx = new TBST<uint32_t, TNode* >(aIndex, node, nullptr);
 		return true;
 	}
 
 	nodes->Insert(aNode, node);
-	nodesIdx->Insert(aIndex, node);
 
 	// Return true to continue reading
 	return true;
@@ -41,7 +39,7 @@ static bool EdgeReadCallback(const int aIndex, const int aTotalCount, const std:
 	std::cout << "  Loading Edge " << (aIndex + 1) << " of " << aTotalCount << ": "
 		<< aFromNode << " -> " << aToNode << " (Weight: " << aWeight << ")\n";
 
-	edges[ nodes->Search(aFromNode)->GetIndex() ][nodes->Search(aToNode)->GetIndex() ] = aWeight;
+	nodes->Search(aFromNode)->edges.Append(new TEdge(nodes->Search(aToNode), aWeight));
 
 	// Return true to continue reading
 	return true;
@@ -53,39 +51,31 @@ void Dijkstra(std::string start="Seoul Hub") {
 	node->UpdateShortestPath(0);
 	TNode* neighbour= nullptr;
 	float costSoFar = 0;
-	TBST<uint32_t, TNode*>* visited = new TBST<uint32_t, TNode* >(node->GetIndex(), node, nullptr);
 
 	while (1) {
 		std::cout << "At node " << *node << "\n";
-		auto index = node->GetIndex();
-		for (size_t i = 0; i < 50; ++i) {
-			if (edges[index][i] != 0) {
-				neighbour = nodesIdx->Search(i)->UpdateShortestPath(costSoFar + edges[index][i]);
-				std::cout << "Has neighbour " << *neighbour << "\n";
-				
-				if (visited->Search(i) == nullptr) {
-					pq->Insert(neighbour);
-				}
+		for (auto edge: node->edges) {
+			neighbour = edge->end->UpdateShortestPath(costSoFar + edge->weigth);
+			std::cout << "Has neighbour " << *neighbour << "\n";
+			
+			if (!neighbour->visited) {
+				pq->Insert(neighbour);
 			}
 		}
 		neighbour = pq->Get();
 		if (neighbour == nullptr) { 
 			std::cout << "\nSummary:\n";
-			for (size_t i = 0; i < 50; ++i) {
-				node = nodesIdx->Search(i);
-				if (node != nullptr)
-					std::cout << *node << std::endl;
+			if (nodes != nullptr) {
+				nodes->InOrderTraversal();
 			}
 			return;
 		}
-		visited->Insert(neighbour->GetIndex(), neighbour);
+		neighbour->visited = true;
 		
 		costSoFar = neighbour->GetShortestPath();
 		node = neighbour;
 		std::cout << std::endl;
-	}
-
-	
+	}	
 }
 
 int RunApp(int argc, char* argv[])
