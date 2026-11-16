@@ -1,5 +1,5 @@
 # "ON" = build Option 1, "OFF" = build Option 2.
-option(BUILD_CATEGORY_4_OPTION_1 "Build Assignment-Category 2 Option 1 (Standard)" ON)
+option(BUILD_CATEGORY_4_OPTION_1 "Build Assignment-Category 2 Option 1 (Standard)" OFF)
 
 add_executable(Category-4
     
@@ -24,6 +24,7 @@ else()
         "Option-2/app.h"
     )
     target_compile_definitions(Category-4 PRIVATE "CATEGORY_4_OPTION=2")
+    target_compile_definitions(Category-4 PRIVATE CMAKE_CURRENT_SOURCE_DIR="${CMAKE_CURRENT_SOURCE_DIR}")
 endif()
 
 target_link_libraries(Category-4 PRIVATE StructureReader)

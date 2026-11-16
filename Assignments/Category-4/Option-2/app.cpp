@@ -1,9 +1,10 @@
 #include <iostream>
 #include "./app.h"
-#include "SharedLib.h"
-#include <NewStuff/TBST.h>
-#include <NewStuff/PriorityQueue.h>
+#include "DataStructures/TBST.h"
+#include "DataStructures/PriorityQueue.h"
 #include "TNode.h"
+#include "StructureReader.h"
+
 static constexpr std::string_view AssignmentOption = "Option 2: Data Center Network Monitor.";
 
 TBST< std::string, TNode* >* nodes = nullptr;
@@ -45,7 +46,7 @@ static bool EdgeReadCallback(const int aIndex, const int aTotalCount, const std:
 	return true;
 }
 
-void Dijkstra(std::string start="Oslo") {
+void Dijkstra(std::string start="Seoul Hub") {
 	auto pq = new TPriorityQueue<float, TNode*>;
 	TNode* node = nodes->Search(start);
 	node->UpdateShortestPath(0);
@@ -88,7 +89,7 @@ void Dijkstra(std::string start="Oslo") {
 	
 }
 
-int RunApp()
+int RunApp(int argc, char* argv[])
 {
 	setlocale(LC_ALL, ".UTF8");
 
@@ -96,23 +97,24 @@ int RunApp()
 
 	// Path to the graph data file
 	//std::string filename = "F:\\IKT203\\VisualStudio\\DATA\\city_graph.txt";
-	std::string filename = std::string(CMAKE_CURRENT_SOURCE_DIR).append("/Assignment-04/city_graph.txt");
+	std::string filename = std::string(CMAKE_CURRENT_SOURCE_DIR).append("/../../Structure/graph_esport_global.txt");
 
 	std::cout << "Reading graph from file: " << filename << "\n\n";
 
 	// Call the utility function with both callbacks
-	readGraphFromFile(filename, NodeReadCallback, EdgeReadCallback);
+	ReadGraphFromFile(filename, NodeReadCallback, EdgeReadCallback);
 
 	std::cout << "\nFinished reading graph.\nType in the city you want to go to:" << std::endl;
 
 	std::string start;
 	std::getline(std::cin, start);
-
-	Dijkstra(start);
-	return 0;
-}
-
-int RunApp(int argc, char* argv[]) {
-
+	if (start=="")
+	{
+		Dijkstra();
+	}
+	else
+	{
+		Dijkstra(start);
+	}
 	return 0;
 }

@@ -1,11 +1,11 @@
 #include "./app.h"
 #include <iostream>
-#include "TAVL.h"
-#include "TBST.h"
 #include <sstream>
 #include <fstream>
 #include "DataStructures/TQueue.hpp"
 #include "DataStructures/TStack.hpp"
+#include "DataStructures/TAVL.h"
+#include "DataStructures/TBST.h"
 #include "search.h"
 #include "StructureReader.h"
 
