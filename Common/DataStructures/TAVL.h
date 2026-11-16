@@ -6,11 +6,11 @@
 #include <iostream>
 
 /**
-@brief AVL-tree
-@note Could have inherited from TBST, but there where issues with that so I didn't.
-@warning The rotation function change what is the root node, workaround is the GetRoot function.
-@tparam T Data that is stored in AVL-tree, Needs to be a pointer type.
-@tparam K Datatype used for key, must support comparison with <,>,==,!=.
+* @brief AVL-tree
+* @note Could have inherited from TBST, but there where issues with that so I didn't.
+* @warning The rotation function change what is the root node, workaround is the GetRoot function.
+* @tparam T Data that is stored in AVL-tree, Needs to be a pointer type.
+* @tparam K Datatype used for key, must support comparison with <,>,==,!=.
 */
 template <typename K, typename T>
 class TAVL: public TTreeBase<TAVL<K,T>, K, T> {
