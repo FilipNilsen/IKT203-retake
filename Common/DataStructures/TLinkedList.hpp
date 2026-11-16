@@ -33,7 +33,6 @@ public:
         do {
             pNext = head->GetNextElement();
             delete head;
-            //^Will pNext be deleted??
             head = pNext;
         } while (head != nullptr);
     }
@@ -116,7 +115,7 @@ public:
     /**
      * @returns The content of the node at aIndex.
      */
-    void* GetAtIndex(size_t aIndex) {
+    T GetAtIndex(size_t aIndex) {
         auto a = GetNodeAtIndex(aIndex);
         if (a == nullptr)
             return nullptr;
